@@ -33,8 +33,8 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 # pylint: enable=C0103
 
-STATUS_URL = 'https://rapportive.com/login_status?user_email={0}'
-URL = 'https://profiles.rapportive.com/contacts/email/{0}'
+STATUS_URL = '{0}://rapportive.com/login_status?user_email={1}'
+URL = '{0}://profiles.rapportive.com/contacts/email/{1}'
 
 
 # pylint: disable=R0903
@@ -74,7 +74,7 @@ class Profile(object):
         )
 
 
-def request(email, auth_email=None, proxies={}):
+def request(email, auth_email=None, proxies={}, scheme='https'):
     '''
     rapportive_request(email): Sends a query to the undocumented Rapportive API
                                Returns the response as a dict
@@ -82,7 +82,7 @@ def request(email, auth_email=None, proxies={}):
     '''
     if not auth_email:
         auth_email = email
-    status_url = STATUS_URL.format(auth_email)
+    status_url = STATUS_URL.format(scheme, auth_email)
     response = requests.get(status_url, proxies=proxies).json()
     session_token = response.get('session_token')
     # fail gracefully if there is an error
@@ -90,7 +90,7 @@ def request(email, auth_email=None, proxies={}):
         return response['error']
     elif response['status'] == 200 and session_token:
         logger.debug('Session token: {0}'.format(session_token))
-        url = URL.format(email)
+        url = URL.format(scheme, email)
         headers = {'X-Session-Token': session_token}
         response = requests.get(url, headers=headers,proxies=proxies).json()
         if response.get('success') != 'nothing_useful':
