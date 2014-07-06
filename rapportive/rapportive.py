@@ -74,12 +74,15 @@ class Profile(object):
         )
 
 
-def request(email):
+def request(email, auth_email=None):
     '''
     rapportive_request(email): Sends a query to the undocumented Rapportive API
                                Returns the response as a dict
+    
     '''
-    status_url = STATUS_URL.format(email)
+    if not auth_email:
+        auth_email = email
+    status_url = STATUS_URL.format(auth_email)
     response = requests.get(status_url).json()
     session_token = response.get('session_token')
     # fail gracefully if there is an error
