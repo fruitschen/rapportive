@@ -74,7 +74,7 @@ class Profile(object):
         )
 
 
-def request(email, auth_email=None, proxies={}, scheme='https'):
+def request(email, auth_email=None, proxies={}, scheme='https', timeout=None):
     '''
     rapportive_request(email): Sends a query to the undocumented Rapportive API
                                Returns the response as a dict
@@ -83,7 +83,7 @@ def request(email, auth_email=None, proxies={}, scheme='https'):
     if not auth_email:
         auth_email = email
     status_url = STATUS_URL.format(scheme, auth_email)
-    response = requests.get(status_url, proxies=proxies).json()
+    response = requests.get(status_url, proxies=proxies, timeout=timeout).json()
     session_token = response.get('session_token')
     # fail gracefully if there is an error
     if 'error' in response:
@@ -92,7 +92,7 @@ def request(email, auth_email=None, proxies={}, scheme='https'):
         logger.debug('Session token: {0}'.format(session_token))
         url = URL.format(scheme, email)
         headers = {'X-Session-Token': session_token}
-        response = requests.get(url, headers=headers,proxies=proxies).json()
+        response = requests.get(url, headers=headers,proxies=proxies, timeout=timeout).json()
         if response.get('success') != 'nothing_useful':
             return Profile(response.get('contact'))
     return {}
